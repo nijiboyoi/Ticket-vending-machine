@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>券売機</title>
+</head>
+<body>
+    <h1>券売機</h1>
+
+    <!-- 券の選択フォーム -->
+    <form id="ticketForm">
+        <label for="ticketType">券の種類:</label>
+        <select id="ticketType">
+            <option value="ticketA">A券</option>
+            <option value="ticketB">B券</option>
+            <!-- 他の券のオプションを追加 -->
+        </select>
+
+        <label for="quantity">数量 (1-100):</label>
+        <input type="number" id="quantity" min="1" max="100" value="1">
+
+        <button type="button" onclick="addToCart()">カートに追加</button>
+    </form>
+
+    <!-- カートの内容と合計金額 -->
+    <div id="cart">
+        <h2>カート</h2>
+        <ul id="cartItems">
+            <!-- カートのアイテムはここに追加されます -->
+        </ul>
+        <p>合計金額: <span id="totalPrice">0</span></p>
+    </div>
+
+    <!-- 会計ボタン -->
+    <button id="checkoutButton" onclick="checkout()">会計</button>
+
+    <!-- 支払いボタンとメッセージ -->
+    <div id="paymentSection" style="display: none;">
+        <button id="paymentButton">支払う</button>
+        <p id="paymentMessage"></p>
+    </div>
+
+    <script>
+        var cart = [];
+
+        // カートにアイテムを追加する関数
+        function addToCart() {
+            var ticketType = document.getElementById("ticketType").value;
+            var quantity = parseInt(document.getElementById("quantity").value);
+
+            // カートにアイテムを追加または更新
+            var itemIndex = findCartItemIndex(ticketType);
+            if (itemIndex !== -1) {
+                // 既にカートに同じタイプのアイテムがある場合、数量を更新
+                cart[itemIndex].quantity += quantity;
+            } else {
+                // カートに新しいアイテムを追加
+                cart.push({ type: ticketType, quantity: quantity });
+            }
+
+            // カートの表示を更新
+            updateCartDisplay();
+
+            // 合計金額を計算
+            var totalPrice = calculateTotalPrice();
+            document.getElementById("totalPrice").textContent = totalPrice + " 円";
+        }
+
+        // カート内で指定したタイプのアイテムを探す関数
+        function findCartItemIndex(type) {
+            for (var i = 0; i < cart.length; i++) {
+                if (cart[i].type === type) {
+                    return i;
+                }
+            }
+            return -1; // アイテムが見つからなかった場合
+        }
+
+        // カートの表示を更新する関数
+        function updateCartDisplay() {
+            var cartItems = document.getElementById("cartItems");
+            cartItems.innerHTML = ""; // カートの内容を一度クリア
+
+            for (var i = 0; i < cart.length; i++) {
+                var item = cart[i];
+                var newItem = document.createElement("li");
+                newItem.textContent = item.type + " x " + item.quantity;
+                cartItems.appendChild(newItem);
+            }
+        }
+
+        // 合計金額を計算する関数
+        function calculateTotalPrice() {
+            var totalPrice = 0;
+
+            for (var i = 0; i < cart.length; i++) {
+                var item = cart[i];
+                var ticketPrice;
+
+                switch (item.type) {
+                    case "ticketA":
+                        ticketPrice = 100;
+                        break;
+                    case "ticketB":
+                        ticketPrice = 200;
+                        break;
+                    // 他の券の価格を追加
+                }
+
+                totalPrice += ticketPrice * item.quantity;
+            }
+
+            return totalPrice;
+        }
+
+        // 会計処理を開始する関数
+        function checkout() {
+            // 新しいタブを開いて支払い処理を行う
+            var paymentWindow = window.open('', '_blank');
+            paymentWindow.document.write('<html><head><title>支払い</title></head><body>');
+            paymentWindow.document.write('<h1>支払い</h1>');
+            paymentWindow.document.write('<p>合計金額: ' + document.getElementById("totalPrice").textContent + '</p>');
+            paymentWindow.document.write('<button id="paymentButton">支払う</button>');
+            paymentWindow.document.write('<p id="paymentMessage"></p>');
+            paymentWindow.document.write('</body></html>');
+            paymentWindow.document.close();
+
+            // 支払いボタンがクリックされたら「ありがとうございます」を表示
+            paymentWindow.document.getElementById("paymentButton").addEventListener("click", function () {
+                paymentWindow.document.getElementById("paymentButton").style.display = "none";
+                paymentWindow.document.getElementById("paymentMessage").textContent = "ありがとうございます";
+            });
+        }
+    </script>
+</body>
+</html>
